@@ -95,6 +95,32 @@ const consultaRut = async () => {
   });
 };
 
+//? Editar informacion alumno
+const editarPorRut = async () => {
+  pool.connect(async (err_conexion, client, release) => {
+    if (err_conexion) return console.log(err_conexion.code);
+
+    const nombre = argumento[1];
+    const rut = argumento[2];
+    const curso = argumento[3];
+    const nivel = argumento[4];
+    const sqlQuery = `UPDATE estudiante SET nombre = $1, rut = $2, curso = $3, nivel = $4 WHERE nombre = $1 RETURNING *;`;
+    const rowMode = "";
+    const values = [nombre, rut, curso, nivel];
+
+    try {
+      await client.query(
+        generarQuery("edita_estudiante", rowMode, sqlQuery, values)
+      );
+      console.log(`Estudiante ${nombre} editado con exito`);
+    } catch (err_consulta) {
+      console.error("Error en la consulta, codigo:", err_consulta.code);
+    }
+    release();
+    pool.end();
+  });
+};
+
 //? Elimina alumno por RUT
 const eliminarPorRut = async () => {
   pool.connect(async (err_conexion, client, release) => {
@@ -125,6 +151,8 @@ if (funcion === "nuevo") {
   consultaTodos();
 } else if (funcion === "rut") {
   consultaRut();
+} else if (funcion === "editar") {
+  editarPorRut();
 } else if (funcion === "eliminar") {
   eliminarPorRut();
 } else {
